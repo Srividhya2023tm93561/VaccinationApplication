@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # MongoDB service
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - backend_network
+    restart: always
+
+  # Flask backend service
+  backend:
+    build:
+      context: ./backend  # Path to the backend folder where Dockerfile is located
+    container_name: vaccination_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/vaccination_app  # MongoDB connection URI
+    depends_on:
+      - mongodb  # Ensure MongoDB starts before the Flask app
+    networks:
+      - backend_network
+    restart: always
+
+# Volumes for persisting MongoDB data
+volumes:
+  mongodb-data:
+
+# Networks for connecting the services
+networks:
+  backend_network:
+    driver: bridge
